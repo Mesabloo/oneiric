@@ -1,11 +1,11 @@
 CC = gcc
-C_FLAGS = -Wall -m32 -nostdlib -fno-builtin -fno-leading-underscore
+C_FLAGS = -Wall -m32 -nostdlib -fno-builtin -fno-leading-underscore -g
 AS = as
 AS_FLAGS = --32
 LD = ld
 LD_FLAGS = -melf_i386
 
-objects = loader.o kernel.o stderr.o stdio.o
+objects = loader.o kernel.o stderr.o stdio.o stdmem.o
 
 %.o: %.c
 	$(CC) $(C_FLAGS) -o $@ -c $<
@@ -18,4 +18,4 @@ oneiric.bin: $(objects)
 	
 clean:
 	find -name "*~" -delete
-	rm -rf $(objects) oneiric.bin
+	rm -rf *.o oneiric.bin
