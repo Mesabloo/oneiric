@@ -2,6 +2,9 @@
 #ifndef STDIO_H
 #define STDIO_H
 
+/**
+ * Represents all the color codes available for printing
+ */
 typedef enum 
 {
     BLACK = 0x0,
@@ -22,8 +25,18 @@ typedef enum
     WHITE = 0xF
 } Color;
 
+/**
+ * A simple way to convert two colors into a special code
+ */
 unsigned char makeColor(Color const foreground, Color const background);
-void puts_(short const color, char const* text);
+/**
+ * Just put a string with a color on the screen, nothing fancy
+ * Also handles tabulations, new lines, and output scrolling
+ */
+void puts_(unsigned char const color, char const* text);
+/**
+ * Basically resets the video buffer to its original state
+ */
 void clear_();
 
 #endif
