@@ -75,24 +75,21 @@ handleReturn:
     cmp $1, %edi
 
     /* We wanna write this in red to represent how much dramatic the situation is. */
-    movb $0x0c, %ah
+    pushl $0x0c
 
     je hr_code1
     jne hr_codeU
     
     hr_code1:
-        movl $err_code1, %esi
+        pushl $err_code1
         jmp hr_end
         
     hr_codeU:
-        movl $err_codeU, %esi
+        pushl $err_codeU
         jmp hr_end
         
     hr_end:
         call puts
-        
-        xor %esi, %esi
-        xor %edi, %edi
         ret
     
 .section .data        

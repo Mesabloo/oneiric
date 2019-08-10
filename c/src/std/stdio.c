@@ -10,7 +10,7 @@ unsigned char makeColor(Color const foreground, Color const background)
     return (background << 4) + foreground;
 }
 
-void puts_(unsigned char const color, char const* text)
+/* extern */ void puts(unsigned char const color, char const* text)
 {
     for (unsigned int i = 0; text[i]; ++i)
     {
@@ -21,7 +21,7 @@ void puts_(unsigned char const color, char const* text)
                 
                 if (actualLine == 24) // if we are on the last line
                 {
-                    memcpy_(textBuffer + 80, 80*24, textBuffer);
+                    memcpy(textBuffer + 80, 80*24, textBuffer);
                     /**
                      * Copy the whole screen (except the first line)
                      * to the first line. That way, all lines are
@@ -53,7 +53,7 @@ void puts_(unsigned char const color, char const* text)
     }
 }
 
-void clear_()
+/* extern */ void clear()
 {
     for (textBufferIndex = 80*25; textBufferIndex > 0; --textBufferIndex)
     {

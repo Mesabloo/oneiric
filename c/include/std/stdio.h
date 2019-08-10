@@ -33,10 +33,10 @@ unsigned char makeColor(Color const foreground, Color const background);
  * Just put a string with a color on the screen, nothing fancy
  * Also handles tabulations, new lines, and output scrolling
  */
-void puts_(unsigned char const color, char const* text);
+extern void puts(unsigned char const color, char const* text);
 /**
  * Basically resets the video buffer to its original state
  */
-void clear_();
+extern void clear();
 
 #endif
