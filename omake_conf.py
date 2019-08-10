@@ -6,7 +6,8 @@ import glob
 ## Constants
 
 CC = 'gcc'
-CC_FLAGS = ['-Wall', '-m32', '-nostdlib', '-fno-builtin', '-fno-leading-underscore', '-g', '-I', 'c/include', '-c']
+CC_FLAGS = ['-Wall', '-m32', '-nostdlib', '-fno-builtin', '-fno-leading-underscore', '-g'
+           , '-I', 'c/include', '-c', '-fno-stack-protector', '-ffreestanding']
 
 AS = 'as'
 AS_FLAGS = ['--32']
