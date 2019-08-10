@@ -1,6 +1,6 @@
-#include "stdio.h"
-#include "stdint.h"
-#include "stdmem.h"
+#include <std/stdio.h>
+#include <std/stdint.h>
+#include <std/stdmem.h>
 
 static unsigned short* const textBuffer = (unsigned short*) 0xb8000; // graphical buffer is at 0xa0000
 static unsigned int textBufferIndex = 0; // offset in text memory

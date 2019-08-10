@@ -13,6 +13,7 @@
 
     .global load
     .global _start
+    .global enablePaging
     
     .extern kMain
     .extern puts
@@ -22,7 +23,7 @@
     .align 4
     
 _start:
-    cli
+    cli     /* We disable interrupts */
 
     movl $stack, %esp
     
@@ -37,7 +38,7 @@ _start:
      * or 0b10000000, %eax  // Change the bit of the long mode to 1
      * wrmsr                // write the register
      */
-    
+
     /* We load our GDT descriptor table pointing to the actual GDT */
     lgdt glob_desc_table
     /* We need to first set the CS segment to the second entry of the GDT. Since there is no such instruction,
@@ -99,31 +100,29 @@ handleReturn:
         gdt_ptr_null:
             .quad 0
         gdt_ptr_code:
-            .word 0xffff     ;# segment size limit
-            .word 0          ;# first base (bit #0 -> #15)
-            .byte 0          ;# second base (bit #16 -> #23)
-            .byte 0x9a       ;# access byte
-            .byte 0b11001111 ;# high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide)
-            .byte 0          ;# third base (bit #24 -> #31)
+            .word 0xffff     /* segment size limit */
+            .word 0          /* first base (bit #0 -> #15) */
+            .byte 0          /* second base (bit #16 -> #23) */
+            .byte 0x9a       /* access byte */
+            .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
+            .byte 0          /* third base (bit #24 -> #31) */
         gdt_ptr_data:
-            .word 0xffff     ;# segment size limit
-            .word 0          ;# first base (bit #0 -> #15)
-            .byte 0          ;# second base (bit #16 -> #23)
-            .byte 0x92       ;# access byte
-            .byte 0b11001111 ;# high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide)
-            .byte 0          ;# third base (bit #24 -> #31)
+            .word 0xffff     /* segment size limit */
+            .word 0          /* first base (bit #0 -> #15) */
+            .byte 0          /* second base (bit #16 -> #23) */
+            .byte 0x92       /* access byte */
+            .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
+            .byte 0          /* third base (bit #24 -> #31) */
     gdt_end:
             
     boot_data:
-        boot_data_magicptr:      .long 0 ;# stored in ebx when booting
-        boot_data_multibootptr:  .long 0 ;# stored in eax when booting
+        boot_data_magicptr:      .long 0 /* stored in ebx when booting */
+        boot_data_multibootptr:  .long 0 /* stored in eax when booting */
         
     glob_desc_table:
         glob_desc_table_size:    .word gdt_end - gdt_ptr - 1
         glob_desc_table_ptr:     .long gdt_ptr
-            
-    ;# add paging once in 64-bit long mode
     
 .section .bss
-    .space 1024*1024
+    .space 1024*1024    /* 1 MiB */
     stack:

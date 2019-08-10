@@ -1,5 +1,5 @@
-#include "kernel.h"
-#include "stdio.h"
+#include <core/kernel.h>
+#include <std/stdio.h>
 
 /* extern */ int kMain(void* bootData)
 {
