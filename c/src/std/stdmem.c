@@ -6,6 +6,16 @@ void memcpy(void* src, unsigned int const size, void* dest)
         :
         : "S" (src),
           "D" (dest),
-          "c" (size) /* `rep` uses %ecx */
+          "c" (size) /* `rep` uses %(e)cx */
+    );
+}
+
+void memset(void* src, unsigned char value, size_t n)
+{
+    asm inline(
+        "rep stosb"
+        :: "D" (src),
+           "a" (value),
+           "c" (n) /* `rep` uses %(e)cx */
     );
 }
