@@ -9,33 +9,44 @@ multiboot_begin_addr:
     .align 4
      
 multiboot_header:
-    .long MAGIC
-    .long FLAGS
-    .long CHECKSUM
-    .long multiboot_header
-    .long multiboot_begin_addr
-    .long multiboot_end_addr
-    .long stack
-    .long _start
+    .long MAGIC /* Magic number, should be 0x1badb002 */
+    .long FLAGS /* Flags, should at least have bit #0 and #1 set, bit #16 for addresses, and bit #2 for video information */
+    .long CHECKSUM /* Checksum (= -(kernelMagic + flags)) where kernelMagic = 0x1badb002 */
+.ifnb FLAGS & (1 << 16)
+    .long multiboot_header /* Multiboot header start address (if bit #16 is set) */
+    .long multiboot_begin_addr /* Kernel start load address (if bit #16 is set) */
+    .long multiboot_end_addr /* Kernel end load address (if bit #16 is set) */
+    .long stack /* .bss section end address (if bit #16 is set) */
+    .long _start /* Kernel entry address (where to jump when starting) (if bit #16 is set) */
+.endif
+.ifnb FLAGS & (1 << 2)
+    .long 1 /* Video mode type (0 == graphical, 1 == text) (if bit #2 is set) */
+    .long 80 /* Screen width (if graphical, in pixels, else in characters) (if bit #2 is set) */
+    .long 25 /* Screen height (if graphical, in pixels, else in characters) (if bit #2 is set) */
+    .long 0 /* Screen depth (number of bits per pixel if in graphical mode, else 0) (if bit #2 is set) */
+.endif
 
+    .align 4
+
+program:
     .global load
     .global _start
-    .global enablePaging
     
     .extern kMain
     .extern puts
     .extern err_code1
+    .extern err_code2
+    .extern err_code4
     .extern err_codeU
-
-    .align 4
     
 _start:
     cli     /* We disable interrupts */
 
     movl $stack, %esp
     
-    movl %eax, boot_data_multibootptr
-    movl %ebx, boot_data_magicptr
+    movl %eax, boot_data_magicptr
+    movl $multiboot_header, boot_data_kernelinfoptr
+    movl %ebx, boot_data_multibootptr
 
     /* The following enables long mode. We aren't going to enable this for the moment, as this is
        for the moment a 32-bit kernel. */
@@ -62,7 +73,9 @@ main:
     movw %ax, %gs
     
     /* We push our structure into the stack and call our `kMain` function */
-    pushl boot_data
+    pushl boot_data_multibootptr
+    pushl boot_data_kernelinfoptr
+    pushl boot_data_magicptr
     call kMain
     
     /* If we have reached this part of the code, we can safely say that the kernel has errored out, since it
@@ -79,24 +92,36 @@ main:
    working placeholder. */
 handleReturn:
     /* Pretty simple code that behaves the same as a `if` in C. */
-    cmp $1, %edi
 
-    /* We wanna write this in red to represent how much dramatic the situation is. */
-    pushl $0x0c
-
+    cmp $0b1, %edi
     je hr_code1
+    cmp $0b10, %edi
+    je hr_code2
+    cmp $0b100, %edi
+    je hr_code4
     jne hr_codeU
     
     hr_code1:
         pushl $err_code1
         jmp hr_end
-        
+    hr_code2:
+        pushl $err_code2
+        jmp hr_end
+    hr_code4:
+        pushl $err_code4
+        jmp hr_end
     hr_codeU:
         pushl $err_codeU
         jmp hr_end
         
     hr_end:
+        /* We wanna write this in red to represent how much dramatic the situation is. */
+        pushl $0x0c
+
         call puts
+
+        xorl %edi, %edi
+        add $0x8, %esp
         ret
     
 .section .data        
@@ -120,8 +145,9 @@ handleReturn:
     gdt_end:
             
     boot_data:
-        boot_data_magicptr:      .long 0 /* stored in ebx when booting */
-        boot_data_multibootptr:  .long 0 /* stored in eax when booting */
+        boot_data_magicptr:      .long 0 /* stored in eax when booting */
+        boot_data_kernelinfoptr: .long 0
+        boot_data_multibootptr:  .long 0 /* stored in ebx when booting */
         
     glob_desc_table:
         glob_desc_table_size:    .word gdt_end - gdt_ptr - 1
