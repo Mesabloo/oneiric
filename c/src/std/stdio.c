@@ -1,5 +1,5 @@
 #include <std/stdio.h>
-#include <std/stdint.h>
+#include <std/stddef.h>
 #include <std/stdmem.h>
 
 static unsigned short* const textBuffer = (unsigned short*) 0xb8000; // graphical buffer is at 0xa0000
