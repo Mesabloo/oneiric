@@ -1,4 +1,5 @@
 *.o
 *.bin
+*.lock
 __pycache__
 .vscode
