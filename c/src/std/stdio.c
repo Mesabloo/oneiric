@@ -55,8 +55,6 @@ unsigned char makeColor(Color const foreground, Color const background)
 
 /* extern */ void clear()
 {
-    for (textBufferIndex = 80*25; textBufferIndex > 0; --textBufferIndex)
-    {
-        textBuffer[textBufferIndex] = (makeColor(WHITE, BLACK) << 8) + '\0';
-    }
+    textBufferIndex = 0;
+    memset(textBuffer, 0, 80*25*2);
 }
