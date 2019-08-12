@@ -1,15 +1,22 @@
 .set MAGIC, 0x1badb002
-.set FLAGS, (1 << 0 | 1 << 1)
+.set FLAGS, (1 << 0 | 1 << 1 | 1 << 16)
 .set CHECKSUM, -(MAGIC + FLAGS)
 
+multiboot_begin_addr:
 .section .text
     jmp _start
     
     .align 4
      
+multiboot_header:
     .long MAGIC
     .long FLAGS
     .long CHECKSUM
+    .long multiboot_header
+    .long multiboot_begin_addr
+    .long multiboot_end_addr
+    .long stack
+    .long _start
 
     .global load
     .global _start
@@ -119,7 +126,8 @@ handleReturn:
     glob_desc_table:
         glob_desc_table_size:    .word gdt_end - gdt_ptr - 1
         glob_desc_table_ptr:     .long gdt_ptr
-    
+multiboot_end_addr:    
+
 .section .bss
-    .space 1024*1024    /* 1 MiB */
+    .space 1024*1024*10    /* 10 MiB */
     stack:
