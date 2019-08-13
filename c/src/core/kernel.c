@@ -18,8 +18,10 @@
 
 #include <core/kernel.h>
 #include <std/stdio.h>
-#include <core/paging.h>
+#include <core/memory/paging.h>
 #include <core/multiboot.h>
+#include <std/stdstr.h>
+#include <std/stderr.h>
 
 /* extern */ int kMain(uint32_t magicNumber, MultibootInfo* kernelInfoPtr, MultibootTable* tablePtr)
 {
@@ -32,15 +34,11 @@
                         blueOnBlack = makeColor(BLUE, BLACK),
                         magentaOnBlack = makeColor(MAGENTA, BLACK);
 
-    if (!magicNumber)
-        return 1 << 1;
-    if (!tablePtr)
-        return 1 << 1;
-    if (!kernelInfoPtr)
-        return 1 << 1;
+    assert(magicNumber);
+    assert(tablePtr);
+    assert(kernelInfoPtr);
 
-    if (magicNumber != 0x2badb002)
-        return 1 << 2;
+    assert(magicNumber == 0x2badb002);
 
     puts(whiteOnBlack, "[      ] Booting kernel...\n");
 
@@ -48,6 +46,13 @@
 
     // enable paging
     puts(whiteOnBlack, "[      ] Enabling paging...\n");
+
+    puts(blueOnBlack, "\tKernel info: load_begin=0x");
+    puts(blueOnBlack, int_to_str(kernelInfoPtr->load_addr, 16));
+    puts(blueOnBlack, " ; load_end=0x");
+    puts(blueOnBlack, int_to_str(kernelInfoPtr->load_end_addr, 16));
+    puts(blueOnBlack, "\n\n");
+
     enablePaging(kernelInfoPtr->load_addr, kernelInfoPtr->load_end_addr);
     puts(whiteOnBlack, "[");
     puts(greenOnBlack, "  OK  ");
