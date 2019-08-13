@@ -17,8 +17,8 @@
 */
 
 #pragma once
-#ifndef STDINT_H
-#define STDINT_H
+#ifndef STDDEF_H
+#define STDDEF_H
 
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
@@ -29,5 +29,7 @@ typedef unsigned long int uint32_t;
 typedef signed long long int int64_t;
 typedef unsigned long long int uint64_t;
 typedef long unsigned int size_t;
+
+#define NULL 0
 
 #endif

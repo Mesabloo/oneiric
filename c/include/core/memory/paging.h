@@ -31,13 +31,13 @@ void loadPageDirectory(uint32_t* pageDir);
  * Memory address paging reference:
  * 
  * ? Conventional memory
- * *    [0x00000000;loadBeginAddr - 1] ⇒ [0x00000000;loadBeginAddr - 1]   (identity mapped)   
+ * *    [0x00000000;loadBeginAddr - 1] ⇒ [0x00000000;loadBeginAddr - 1]                 (identity mapped)   
  * 
  * ? Kernel memory
- * *    [loadBeginAddr;loadEndAddr] ⇒ [loadBeginAddr;loadEndAddr &~ 4096] (identity mapped)
+ * *    [loadBeginAddr;loadEndAddr] ⇒ [loadBeginAddr;loadEndAddr &~ 4096]               (identity mapped)
  * 
  * ? Software memory
- * *    [(loadEndAddr &~ 4096) + 1;0xffffffff] ⇒ [loadEndAddr;0xffffffff] (identity mapped)
+ * *    [(loadEndAddr &~ 4096) + 1;0xffffffff] ⇒ [(loadEndAddr &~ 4096) + 1;0xffffffff] (identity mapped)
  */
 
 #endif
