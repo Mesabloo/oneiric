@@ -52,6 +52,7 @@ program:
     
     .extern kMain
     .extern puts
+    .extern abort
     .extern err_code1
     .extern err_code2
     .extern err_code4
@@ -103,7 +104,7 @@ main:
     
     /* We create an infinite loop from there: */
     _infL:
-        hlt       /* We halt the processor. Some motheboards may ignore this instruction, and thus... */
+        call abort /* We abort the process because there is no reason to keep it running */
         jmp _infL /* we loop infinitely, which properly "blocks" the processor just in case. */
         
 /* This is a simple error handler. It will be probably rewritten, but for the moment we just use this as a
