@@ -24,12 +24,12 @@
  * - bits #12~32 -> Page table address, 4 kiB aligned
  */
 
-/**                                                            11 9 7 5 3 1
- *                                                              ↓ ↓ ↓ ↓ ↓ ↓
+/**                                                               11 9 7 5 3 1
+ *                                                                 ↓ ↓ ↓ ↓ ↓ ↓
  */ static uint32_t nextTables[1024][1024]
-        __attribute__((aligned(4096))) = {{0b0000000000000000000000000000010}};
-/**                                          ↑                 ↑   ↑ ↑ ↑ ↑ ↑
- *                                         32                12   8 6 4 2 0
+        __attribute__((aligned(4096))); //= {{0b0000000000000000000000000000010}};
+/**                                             ↑                 ↑   ↑ ↑ ↑ ↑ ↑
+ *                                             32                12   8 6 4 2 0
  *
  * ? In the following paragraph, `unset` refers to `== 0` and `set` refers to `== 1` 
  *
@@ -51,6 +51,7 @@
 void createPages(uint32_t kernBegin, uint32_t kernEnd)
 {
 #define DEFAULTFLAGS 0b11 // supervisor flag, read/write flag and present flag
+    memset(nextTables, 0, 1024*1024*4);
 
     /**
      * Let's first map our conventional memory and our kernel
