@@ -18,14 +18,15 @@
 
 #include <std/stderr.h>
 #include <std/stddef.h>
-#include <std/stdio.h>
+#include <std/io/console.h>
 #include <std/stdstr.h>
 #include <std/stdmem.h>
 
 static void halt()
 {
     asm inline(
-        "cli ; hlt\n"
+        "halt: cli ; hlt\n"
+        "jmp halt\n"
     );
 }
 
@@ -46,35 +47,25 @@ static void halt()
 
 /* extern */ void terminate(char const* message)
 {
-    clear();
-
     uint32_t address = (uint32_t)__builtin_return_address(0);
     char buf[9];
     size_t const height = 25, width = 80;
     memset(buf, 0, 9);
     uint_to_str(address, buf, 16);
 
-    assert(strlen(message) < width - 12);
+    moveCursorAt(0, 0);
+    for (size_t i = 0; i < height * width; ++i)
+        puts("\e\x40 ");
 
-    puts("\e\x40");
-    for (size_t i = 0; i < 10; ++i)
-        for (size_t j = 0; j < width; ++j)
-            puts(" ");
-    puts("                                    \e\x74 Oneiric \e\x40                                   ");
-    for (size_t i = 0; i < 4; ++i)
-        for (size_t j = 0; j < width; ++j)
-            puts(" ");
+    moveCursorAt(40 - 4, 8);
+    puts("\e\x74 Oneiric ");
 
-    putsN("\e\x47  * What happened: The kernel terminated because of a fatal exception.            * Reason: ", message, 0);
-    for (size_t i = 0; i < width - 12 - strlen(message); ++i)
-        puts(" ");
-    putsN("  * At: 0x", buf, 0);
-
-    for (size_t i = 0; i < width - 10 - strlen(buf); ++i)
-        puts(" ");
-    for (size_t i = 0; i < 7; ++i)
-        for (size_t j = 0; j < width; ++j)
-            puts(" ");
+    moveCursorAt(4, 15);
+    putsN("\e\x47", "* What happened: the kernel had to stop its execution because a fatal error occurred!", 0);
+    moveCursorAt(4, getCursorLine() + 1);
+    putsN("\e\x47", "* Reason: ", message, 0);
+    moveCursorAt(4, getCursorLine() + 1);
+    putsN("\e\x47", "* At: 0x", buf, 0);
 
     halt();
 }

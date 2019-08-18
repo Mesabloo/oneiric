@@ -19,7 +19,7 @@
 #include <std/stdstr.h>
 #include <std/stdmem.h>
 
-static char *symbols = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static char const* const symbols = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 char const* int_to_str(int32_t value, char* buffer, short base)
 {

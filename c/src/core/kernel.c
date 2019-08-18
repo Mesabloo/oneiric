@@ -1,23 +1,30 @@
 #include <core/kernel.h>
-#include <std/stdio.h>
+#include <std/io/console.h>
 #include <std/stddef.h>
 #include <std/stderr.h>
 
 /* extern */ void kMain()
 {
     clear();
-    puts("\e\x08         Booting kernel...\n");
+    moveCursorAt(80 - 19, 24);
+    puts("\e\x74 Booting kernel... ");
 
-    puts("[\e\x0A  OK  \e\x08] Booted kernel!\n");
+    asm inline(
+        "movl $500000000000, %ecx\n"
+        ".L5: loop .L5\n"
+    );
+    moveCursorAt(0, 0);
+    puts("\e\x07[\e\x0A  OK  \e\x07] Nothing to activate right now... (will come soon)\n");
 
-    puts("\n\e\x08         Welcome to \e\x0DOneiric\e\x08!\n\n");
+    moveCursorAt(80 - 19, 24);
+    puts("\e\x72 Booted kernel!    ");
 
     asm inline(
         "movl $1000000000000, %ecx\n"
-        ".L1: loop .L1\n"
+        ".L6: loop .L6\n"
     );
 
-    terminate("This kernel is not fully implemented yet! lollollollollollollollollollollollollollollollollollollollollol");
+    terminate("This kernel is not fully implemented yet!");
 
     while (1);
 }
