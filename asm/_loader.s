@@ -1,5 +1,5 @@
 .set MULTIBOOT_MAGIC_NUMBER, 0x1BADB002
-.set MULTIBOOT_FLAGS, (1 << 0 | 1 << 1)
+.set MULTIBOOT_FLAGS, (1 << 0 | 1 << 1 | 1 << 2)
 .set MULTIBOOT_CHECKSUM , -(MULTIBOOT_MAGIC_NUMBER + MULTIBOOT_FLAGS)
 .set MULTIBOOT_STRUCT_LENGTH, 118
 
@@ -12,16 +12,16 @@ multiboot_header:
     .long MULTIBOOT_MAGIC_NUMBER
     .long MULTIBOOT_FLAGS
     .long MULTIBOOT_CHECKSUM
-    
+
     .long 0
     .long 0
     .long 0
     .long 0
     .long 0
 
-    .long 0
-    .long 0
-    .long 0
+    .long 1
+    .long 80
+    .long 25
     .long 0
 
 /* end section .multiboot */
@@ -29,7 +29,7 @@ multiboot_header:
 .section .text
     .align 4
     .global _start, start
-    .extern terminate, kMain
+    .extern terminate, kMain, initDisplay
 
 _start: start:
     cld /* First clear the EFLAGS */
@@ -99,6 +99,14 @@ _start: start:
     movl %edx, %cr0 /* And we activate paging */
 
 init:
+    movl $25, %ecx
+    movl $80, %edx
+    pushl %ecx
+    pushl %edx
+    call initDisplay
+    popl %edx
+    popl %ecx /* Initialize the display with dimensions 80×25 */
+
     lgdt glob_desc_table /* We load our Global Descriptor Table */
 
     ljmp $0x08, $init2 /* We initialize %cs */
@@ -113,7 +121,10 @@ init2:
     invlpg 0 /* Invalidate the address 0 */
 
 launch:
+    push $multiboot_info
     call kMain /* And call the main function */
+    sub $0x4, %esp
+
     pushl $0xe550
 
     end_loop:

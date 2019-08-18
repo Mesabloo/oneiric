@@ -24,6 +24,23 @@
 
 static unsigned short* const textBuffer = (unsigned short*) 0xc00b8000; // graphical buffer is at 0x0xc00a0000
 static unsigned int textBufferIndex = 0; // offset in text memory
+static uint16_t displaySizeX = 80, displaySizeY = 25; // default values
+
+/* extern */ void initDisplay(uint16_t sizeX, uint16_t sizeY)
+{
+    displaySizeX = sizeX;
+    displaySizeY = sizeY;
+}
+
+/* extern */ uint16_t getDisplaySizeX()
+{
+    return displaySizeX;
+}
+
+/* extern */ uint16_t getDisplaySizeY()
+{
+    return displaySizeY;
+}
 
 static unsigned char color = '\x07';
 /* extern */ void puts(char const* text)
@@ -33,23 +50,23 @@ static unsigned char color = '\x07';
         switch (text[i]) {
             case '\n': 
             {
-                unsigned short actualLine = textBufferIndex++ / 80;
+                unsigned short actualLine = textBufferIndex++ / displaySizeX;
                 
-                if (actualLine == 24) // if we are on the last line
+                if (actualLine == displaySizeY - 1) // if we are on the last line
                 {
-                    memcpy(textBuffer + 80, 80*24*2, textBuffer);
+                    memcpy(textBuffer + displaySizeX, displaySizeX * (displaySizeY - 1) * 2, textBuffer);
                     /**
                      * Copy the whole screen (except the first line)
                      * to the first line. That way, all lines are
                      * moved on line upwards
                      */
-                    for (unsigned int j = 0; j < 80; ++j)
-                        textBuffer[80*24 + j] = 0x0f00; // reset the last line, we don't want some old trash
-                    textBufferIndex = 80*24; // move the index to the last line
+                    for (unsigned int j = 0; j < displaySizeX; ++j)
+                        textBuffer[displaySizeX * (displaySizeY - 1) + j] = 0x0f00; // reset the last line, we don't want some old trash
+                    textBufferIndex = displaySizeX * (displaySizeY - 1); // move the index to the last line
                 }
                 else
                 {
-                    while (textBufferIndex / 80 == actualLine)
+                    while (textBufferIndex / displaySizeX == actualLine)
                         textBufferIndex++; // Move the cursor until we are on a new line (at the beginning)
                 }
                 break;
@@ -69,17 +86,17 @@ static unsigned char color = '\x07';
                 break;
             default:
             {
-                if (textBufferIndex == 25 * 80)
+                if (textBufferIndex == displaySizeX * displaySizeY)
                 {
-                    memcpy(textBuffer + 80, 80 * 24 * 2, textBuffer);
+                    memcpy(textBuffer + displaySizeX, displaySizeX * (displaySizeY - 1) * 2, textBuffer);
                     /**
                      * Copy the whole screen (except the first line)
                      * to the first line. That way, all lines are
                      * moved on line upwards
                      */
-                    for (unsigned int j = 0; j < 80; ++j)
-                        textBuffer[80 * 24 + j] = 0x0f00; // reset the last line, we don't want some old trash
-                    textBufferIndex = 80 * 24;            // move the index to the last line
+                    for (unsigned int j = 0; j < displaySizeX; ++j)
+                        textBuffer[displaySizeX * (displaySizeY - 1) + j] = 0x0f00; // reset the last line, we don't want some old trash
+                    textBufferIndex = displaySizeX * (displaySizeY - 1);            // move the index to the last line
                 }
 
                 textBuffer[textBufferIndex++] = (color << 8) + text[i];
@@ -107,47 +124,47 @@ static unsigned char color = '\x07';
 /* extern */ void clear()
 {
     textBufferIndex = 0;
-    memset(textBuffer, 0, 80*25*2);
+    memset(textBuffer, 0, displaySizeX * displaySizeY * 2);
 }
 
 /* extern */ void moveCursorLeft()
 {
-    if (textBufferIndex % 80 != 0)
+    if (textBufferIndex % displaySizeX != 0)
         textBufferIndex--;
 }
 
 /* extern */ void moveCursorRight()
 {
-    if (textBufferIndex % 80 != 79)
+    if (textBufferIndex % displaySizeX != displaySizeX - 1)
         textBufferIndex++;
 }
 
 /* extern */ void moveCursorUp()
 {
-    if (textBufferIndex / 80 != 0)
-        textBufferIndex -= 80;
+    if (textBufferIndex / displaySizeX != 0)
+        textBufferIndex -= displaySizeX;
 }
 
 /* extern */ void moveCursorDown()
 {
-    if (textBufferIndex / 80 != 24)
-        textBufferIndex += 80;
+    if (textBufferIndex / displaySizeX != displaySizeY - 1)
+        textBufferIndex += displaySizeX;
 }
 
 /* extern */ void moveCursorAt(uint16_t x, uint16_t y)
 {
-    assert(x < 80);
-    assert(y < 25);
+    assert(x < displaySizeX);
+    assert(y < displaySizeY);
 
-    textBufferIndex = y * 80 + x;
+    textBufferIndex = y * displaySizeX + x;
 }
 
 /* extern */ uint16_t getCursorLine()
 {
-    return textBufferIndex / 80;
+    return textBufferIndex / displaySizeX;
 }
 
 /* extern */ uint16_t getCursorColumn()
 {
-    return textBufferIndex % 80;
+    return textBufferIndex % displaySizeX;
 }
