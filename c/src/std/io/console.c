@@ -20,6 +20,7 @@
 #include <std/stddef.h>
 #include <std/stdmem.h>
 #include <std/stdarg.h>
+#include <std/stderr.h>
 
 static unsigned short* const textBuffer = (unsigned short*) 0xc00b8000; // graphical buffer is at 0x0xc00a0000
 static unsigned int textBufferIndex = 0; // offset in text memory
@@ -64,8 +65,26 @@ static unsigned char color = '\x07';
             case '\e':
                 color = text[++i];
                 break;
+            case '\0':
+                break;
             default:
+            {
+                if (textBufferIndex == 25 * 80)
+                {
+                    memcpy(textBuffer + 80, 80 * 24 * 2, textBuffer);
+                    /**
+                     * Copy the whole screen (except the first line)
+                     * to the first line. That way, all lines are
+                     * moved on line upwards
+                     */
+                    for (unsigned int j = 0; j < 80; ++j)
+                        textBuffer[80 * 24 + j] = 0x0f00; // reset the last line, we don't want some old trash
+                    textBufferIndex = 80 * 24;            // move the index to the last line
+                }
+
                 textBuffer[textBufferIndex++] = (color << 8) + text[i];
+                break;
+            }
         }
         
     }

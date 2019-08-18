@@ -7,7 +7,7 @@
 {
     clear();
     moveCursorAt(80 - 19, 24);
-    puts("\e\x74 Booting kernel... ");
+    puts("\e\x8C Booting kernel... ");
 
     asm inline(
         "movl $500000000000, %ecx\n"
@@ -17,7 +17,7 @@
     puts("\e\x07[\e\x0A  OK  \e\x07] Nothing to activate right now... (will come soon)\n");
 
     moveCursorAt(80 - 19, 24);
-    puts("\e\x72 Booted kernel!    ");
+    puts("\e\x8A Booted kernel!    ");
 
     asm inline(
         "movl $1000000000000, %ecx\n"
