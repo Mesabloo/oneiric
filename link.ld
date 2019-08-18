@@ -7,13 +7,14 @@ SECTIONS
     padding = 0xC0000000;
     . = padding + 0x00100000;
     startKernel = .;
-    .multiboot : AT(ADDR(.multiboot) - padding)
+/*    .multiboot : AT(ADDR(.multiboot) - padding)
     {
-        *(.multiboot*)
-    }
+        
+    } */
 
     .text : AT(ADDR(.text) - padding)
     {
+        *(.multiboot*)
         *(.text*)
     }
 

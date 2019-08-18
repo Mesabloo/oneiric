@@ -12,19 +12,17 @@ multiboot_header:
     .long MULTIBOOT_MAGIC_NUMBER
     .long MULTIBOOT_FLAGS
     .long MULTIBOOT_CHECKSUM
-.ifb MULTIBOOT_FLAGS & (1 << 16)
+    
     .long 0
     .long 0
     .long 0
     .long 0
     .long 0
-.endif
-.ifb MULTIBOOT_FLAGS & (1 << 2)
+
     .long 0
     .long 0
     .long 0
     .long 0
-.endif
 
 /* end section .multiboot */
 
