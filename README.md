@@ -1,6 +1,6 @@
-# Oneiric
+<img width="100" height="100" align="right" src="data/Oneiric_logo_200x200.png">
 
-<img width="150" height="150" align="right" src="data/Oneiric_logo_200x200.png">
+# Oneiric
 
 Oneiric is a project of bringing to life an entirely hand-made Kernel + OS based on how dreams work.
 
