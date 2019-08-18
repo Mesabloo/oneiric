@@ -1,29 +1,43 @@
+ENTRY(_start)
 OUTPUT_FORMAT(elf32-i386)
 OUTPUT_ARCH(i386:i386)
 
 SECTIONS
 {
-    . = 0x00100000;
-    
-    .text :
+    padding = 0xC0000000;
+    . = padding + 0x00100000;
+    startKernel = .;
+    .multiboot : AT(ADDR(.multiboot) - padding)
     {
-        *(.text);
+        *(.multiboot*)
     }
-    
-    .data :
+
+    .text : AT(ADDR(.text) - padding)
     {
-        *(.rodata);
-        *(.data);
+        *(.text*)
     }
-    
-    .bss :
+
+    .data : AT(ADDR(.data) - padding)
     {
-        *(.bss);
+        *(.data*)
     }
-    
+
+    .rodata : AT(ADDR(.rodata) - padding)
+    {
+        *(.rodata*)
+    }
+
+    .bss : AT(ADDR(.bss) - padding)
+    {
+        *(.bss)
+    }
+
+    . = ALIGN(0x1000);
+    endKernel = .;
+
     /DISCARD/ :
     {
-        *(.comment);
+        *(.comment)
     }
 }
 
