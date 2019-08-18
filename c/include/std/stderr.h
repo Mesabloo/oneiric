@@ -20,6 +20,8 @@
 #ifndef STDERR_H
 #define STDERR_H
 
+#include <std/stddef.h>
+
 /**
  * Aborts the program, and prints the address of the last function call (which should be `call abort`)
  */
@@ -28,7 +30,7 @@ extern void abort();
 /**
  * Terminate the program with a beautiful message
  */
-extern void terminate(char const* message);
+extern void terminate(char const *message, uint16_t const error_code);
 
 /**
  * Asserts an expression is true, else aborts the program

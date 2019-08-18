@@ -24,7 +24,7 @@
         ".L6: loop .L6\n"
     );
 
-    terminate("This kernel is not fully implemented yet!");
+    //terminate("This kernel is not fully implemented yet!", 0x0);
 
     while (1);
 }
