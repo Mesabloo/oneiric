@@ -25,8 +25,8 @@
 static void halt()
 {
     asm inline(
-        "halt: cli ; hlt\n"
-        "jmp halt\n"
+        "halt1: cli ; hlt\n"
+        "jmp halt1\n"
     );
 }
 
