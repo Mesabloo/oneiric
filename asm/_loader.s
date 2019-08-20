@@ -17,13 +17,12 @@ multiboot_header:
     .long 0
     .long 0
     .long 0
-    .long 0
+    .long 0 /* Ignore those 5 values, flags[16] is not set */
 
-    .long 1
-    .long 80
-    .long 25
-    .long 0
-
+    .long 1   /* EGA-standard text mode, 0 is the graphical mode */
+    .long 90  /* Preferred width (in pixels for graphical mode, in characters for text mode) */
+    .long 60  /* Preferred height (in pixels for graphical mode, in characters for text mode) */
+    .long 0   /* Preferred color depth. 0 if in text mode, else contains the number of bits per pixel */
 /* end section .multiboot */
 
 .section .text
@@ -39,10 +38,14 @@ _start: start:
     cmp $0x2BADB002, %eax /* Check if the magic number returned by GRUB is correct (no reason it wouldn't) */
     je .copy_multiboot_info
 
-    movl $0x0401, 0xb8000 /* We print a little emote */
+    movl $0x0432, 0xb8000
+    movl $0x0442, 0xb8002
+    movl $0x0441, 0xb8004
+    movl $0x0444, 0xb8006
 
-    pushl $0x2BAD
-    jmp end_loop
+    L1:
+        cli ; hlt
+        jmp L1
 
 .copy_multiboot_info:
     movl %ebx, %esi
@@ -50,20 +53,6 @@ _start: start:
     movl $MULTIBOOT_STRUCT_LENGTH, %ecx
 
     rep movsb /* We copy the multiboot header given by GRUB to a safe location */
-.copy_multiboot_mmap:
-    movl 48(%ebx), %esi
-    movl $(multiboot_mmap - KERNEL_VIRTUAL_BASE), %edi
-    movl 44(%ebx), %ecx
-
-    cmpl $512, %ecx /* If the length of the memory map is too large, there is an error */
-    jle .L4
-
-    movl $0x0402, 0xb8000 /* We also print a little emote */
-
-    pushl $0x11a7
-    jmp end_loop
-.L4:
-    rep movsb /* We copy the memory map given by GRUB to another safe location */
 
 .init_paging: /* Now we initiate paging */
     movl $(bootPT0 - KERNEL_VIRTUAL_BASE), %edi
@@ -99,13 +88,14 @@ _start: start:
     movl %edx, %cr0 /* And we activate paging */
 
 init:
-    movl $25, %ecx
-    movl $80, %edx
-    pushl %ecx
-    pushl %edx
+    pushl $25
+    pushl $80
     call initDisplay
-    popl %edx
-    popl %ecx /* Initialize the display with dimensions 80×25 */
+    sub $0x8, %esp
+
+    pushl $0xc00b8000
+    call initDisplayBuffer
+    sub $0x4, %esp
 
     lgdt glob_desc_table /* We load our Global Descriptor Table */
 
@@ -121,9 +111,9 @@ init2:
     invlpg 0 /* Invalidate the address 0 */
 
 launch:
-    push $multiboot_info
+    pushl $multiboot_info
     call kMain /* And call the main function */
-    sub $0x4, %esp
+    subl $0x4, %esp
 
     pushl $0xe550
 
@@ -170,5 +160,4 @@ launch:
     callstack_top:
 
     .lcomm multiboot_info, 128 /* 128 bytes */
-    .lcomm multiboot_mmap, 512 /* 512 bytes */
 /* end section .bss */
