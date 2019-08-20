@@ -5,15 +5,16 @@ import glob
 
 ## Constants
 
-CC = 'gcc'
-CC_FLAGS = ['-Wall', '-m32', '-nostdlib', '-fno-builtin', '-fno-leading-underscore', '-g'
-           , '-I', 'c/include', '-c', '-fno-stack-protector', '-ffreestanding']
+CC = 'i386-elf-gcc'
+CC_FLAGS = ['-Wall', '-Wextra', '-m32', '-fno-builtin', '-ffreestanding', '-nostdlib'
+           , '-fno-leading-underscore', '-g', '-Ic/include', '-c', '-fno-stack-protector'
+           , '-lgcc']
 
-AS = 'as'
-AS_FLAGS = ['--32']
+AS = CC # 'i386-elf-as'
+AS_FLAGS = CC_FLAGS # ['--32']
 
-LD = 'ld'
-LD_FLAGS = ['-melf_i386']
+LD = CC
+LD_FLAGS = list(filter(lambda p: p != '-c', CC_FLAGS))
 
 binaries = ['*.o', '*.bin']
 current_dir = os.environ['PWD']
@@ -121,7 +122,7 @@ def build_bin(props):
     o_files = list(map(get_o, list(map(lambda p: os.path.join(current_dir, p), sourceDirs))))
     flattened = list(itertools.chain.from_iterable(o_files))
     
-    command = [LD] + LD_FLAGS + ['-o', os.path.join(imageDir, binName), '-T', 'link.ld'] + flattened
+    command = [LD] + ['-o', os.path.join(imageDir, binName), '-Wl,-Tlink.ld'] + flattened + LD_FLAGS
     if props['debug']:
         log.debug('Command used: {}'.format(' '.join(command)), 1)
     cmd = subprocess.Popen(command, stdout=subprocess.PIPE)

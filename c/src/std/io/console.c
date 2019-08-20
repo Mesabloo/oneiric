@@ -17,14 +17,20 @@
 */
 
 #include <std/io/console.h>
-#include <std/stddef.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <std/stdmem.h>
-#include <std/stdarg.h>
+#include <stdarg.h>
 #include <std/stderr.h>
 
-static unsigned short* const textBuffer = (unsigned short*) 0xc00b8000; // graphical buffer is at 0x0xc00a0000
+static unsigned short* textBuffer = (unsigned short*) 0xb8000; // graphical buffer is at 0x0xa0000
 static unsigned int textBufferIndex = 0; // offset in text memory
 static uint16_t displaySizeX = 80, displaySizeY = 25; // default values
+
+/* extern */ void initDisplayBuffer(uint32_t address)
+{
+    textBuffer = (unsigned short*) address;
+}
 
 /* extern */ void initDisplay(uint16_t sizeX, uint16_t sizeY)
 {

@@ -21,7 +21,7 @@
 
 static char const* const symbols = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-char const* int_to_str(int32_t value, char* buffer, short base)
+char const* int_to_str(int64_t value, char* buffer, short base)
 {
     unsigned char isNegative = 0;
     size_t i = 0; // `i` should not get bigger than 32
@@ -58,7 +58,7 @@ char const* int_to_str(int32_t value, char* buffer, short base)
     return buffer;
 }
 
-char const* uint_to_str(uint32_t value, char* buffer, short base)
+char const* uint_to_str(uint64_t value, char* buffer, short base)
 {
     size_t i = 0; // `i` should not get bigger than 32
 

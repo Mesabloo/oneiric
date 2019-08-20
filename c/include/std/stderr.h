@@ -20,7 +20,7 @@
 #ifndef STDERR_H
 #define STDERR_H
 
-#include <std/stddef.h>
+#include <stdint.h>
 
 /**
  * Aborts the program, and prints the address of the last function call (which should be `call abort`)

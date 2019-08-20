@@ -17,7 +17,7 @@
 */
 
 #include <std/stderr.h>
-#include <std/stddef.h>
+#include <stdint.h>
 #include <std/io/console.h>
 #include <std/stdstr.h>
 #include <std/stdmem.h>

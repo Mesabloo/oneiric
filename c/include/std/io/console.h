@@ -20,7 +20,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include <std/stddef.h>
+#include <stdint.h>
 
 /**
  * Just put a string with a color on the screen, nothing fancy
@@ -45,6 +45,7 @@ extern void moveCursorAt(uint16_t x, uint16_t y);
 extern uint16_t getCursorLine();
 extern uint16_t getCursorColumn();
 
+extern void initDisplayBuffer(uint32_t address);
 extern void initDisplay(uint16_t sizeX, uint16_t sizeY);
 extern uint16_t getDisplaySizeX();
 extern uint16_t getDisplaySizeY();

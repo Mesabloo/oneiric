@@ -20,18 +20,19 @@
 #ifndef STDSTR_H
 #define STDSTR_H
 
-#include <std/stddef.h>
+#include <stdint.h>
+#include <stddef.h>
 
 /**
  * A converter from int to string
  * ? The buffer must be at least 33 char long to handle any value converted to any base (32 chars + the trailing 0)
  */
-char const* int_to_str(int32_t value, char* buffer, short base);
+char const* int_to_str(int64_t value, char* buffer, short base);
 /**
  * A converter from uint to string
  * ? The buffer must be at least 33 char long to handle any value converted to any base (32 chars + the trailing 0)
  */
-char const* uint_to_str(uint32_t value, char* buffer, short base);
+char const* uint_to_str(uint64_t value, char* buffer, short base);
 /**
  * In simple words: just reverses a string
  */

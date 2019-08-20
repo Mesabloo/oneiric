@@ -20,7 +20,8 @@
 #ifndef STDMEM_H
 #define STDMEM_H
 
-#include <std/stddef.h>
+#include <stdint.h>
+#include <stddef.h>
 
 /**
  * A simple handler for memory copying

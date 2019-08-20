@@ -2,7 +2,7 @@
 #ifndef MULTIBOOT_H
 #define MULTIBOOT_H
 
-#include <std/stddef.h>
+#include <stdint.h>
 
 /* The symbol table for a.out. */
 struct multiboot_aout_symbol_table
