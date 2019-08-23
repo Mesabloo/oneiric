@@ -12,10 +12,32 @@
     if (mb_info->flags & (1 << 12) && mb_info->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT)
         initDisplay(mb_info->framebuffer_width, mb_info->framebuffer_height);
 
-    clear();
+    { // Draw two colored lines at the top and the bottom:
+        char const *header = "Oneiric v0.0.1 - Copyright (c) 2019 Mesabloo";
+        unsigned short const beginning_header = getDisplaySizeX() / 2 - (strlen(header) / 2 + 1);
+        unsigned short i = 0;
+        puts("\e\x70");
+        for (; i < beginning_header; ++i)
+            puts(" ");
+        puts(header);
+        for (i += strlen(header); i < getDisplaySizeX(); ++i)
+            puts(" ");
 
-    moveCursorAt(getDisplaySizeX() - 19, getDisplaySizeY() - 1);
-    puts("\e\x74 Booting kernel... ");
+        moveCursorAt(0, getDisplaySizeY() - 1);
+        char const* footer = "Status: booting...";
+        unsigned short const beginning_footer = getDisplaySizeX() / 2 - (strlen(footer) / 2 + 1);
+        puts("\e\x70");
+        for (i = 0; i < beginning_footer; ++i)
+            puts(" ");
+        puts(footer);
+        for (i += strlen(footer); i < getDisplaySizeX(); ++i)
+            puts(" ");
+
+        initDisplayBuffer(0xc00b8000 + getDisplaySizeX() * 2);
+        initDisplay(getDisplaySizeX(), getDisplaySizeY() - 2);
+    }
+
+    clear();
 
     {
         moveCursorAt(0, 0);
@@ -98,8 +120,21 @@
 
     //puts("\e\x07[\e\x0A  OK  \e\x07] Nothing to activate right now... (will come soon)\n");
 
-    moveCursorAt(getDisplaySizeX() - 19, getDisplaySizeY() - 1);
-    puts("\e\x72 Booted kernel!    ");
+    {
+        initDisplay(getDisplaySizeX(), getDisplaySizeY() + 1);
+        moveCursorAt(0, getDisplaySizeY() - 1);
+        char const *footer = "Status: booted!";
+        unsigned short const beginning_footer = getDisplaySizeX() / 2 - (strlen(footer) / 2 + 1);
+        puts("\e\x70");
+        unsigned short i;
+        for (i = 0; i < beginning_footer; ++i)
+            puts(" ");
+        puts(footer);
+        for (i += strlen(footer); i < getDisplaySizeX(); ++i)
+            puts(" ");
+
+        initDisplay(getDisplaySizeX(), getDisplaySizeY() - 1);
+    }
 
     asm inline(
         "movl $3567587328, %ecx\n"
