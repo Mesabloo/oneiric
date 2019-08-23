@@ -147,7 +147,7 @@ launch:
 /* end section .data */
 
 .section .rodata
-    .extern err_should_not_be_reached
+    err_should_not_be_reached: .asciz "the kernel has errorred out and has reached code which shouldn't be reached..."
 /* end section .rodata */
 
 .section .bss
