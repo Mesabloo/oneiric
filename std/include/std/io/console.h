@@ -21,6 +21,7 @@
 #define CONSOLE_H
 
 #include <stdint.h>
+#include <stdarg.h>
 
 /**
  * Just put a string with a color on the screen, nothing fancy
@@ -32,6 +33,7 @@ extern void puts(char const* text);
  * Be aware that the arguments list must end with `0`
  */
 extern void putsN(char const* first,...);
+extern void vputsN(va_list args);
 /**
  * Basically resets the video buffer to its original state
  */

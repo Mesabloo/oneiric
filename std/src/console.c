@@ -113,17 +113,23 @@ static unsigned char color = '\x07';
     }
 }
 
-/* extern */ void putsN(char const* first, ...)
+/* extern */ void vputsN(va_list args)
 {
-    va_list args;
-    char const* arg = first;
-
-    va_start(args, first);
+    char const *arg = va_arg(args, char const*);
     while (arg != 0)
     {
         puts(arg);
-        arg = va_arg(args, char const *);
+        arg = va_arg(args, char const*);
     }
+}
+
+/* extern */ void putsN(char const* first, ...)
+{
+    va_list args;
+    va_start(args, first);
+
+    puts(first); vputsN(args);
+
     va_end(args);
 }
 
