@@ -5,6 +5,8 @@
 #include <core/multiboot.h>
 #include <std/stdstr.h>
 #include <std/stdmem.h>
+#include <core/memory/pager.h>
+#include <utils/logs.h>
 
 /* extern */ void kMain(multiboot_info_t* mb_info)
 {
@@ -39,31 +41,34 @@
 
     clear();
 
+#ifndef NDEBUG
     {
         moveCursorAt(0, 0);
         char sizeXBuf[23], sizeYBuf[23];
         memset(sizeXBuf, 0, 23); memset(sizeYBuf, 0, 23);
 
-        putsN("\e\x07[\e\x01 INFO \e\x07] Screen size: "
+        info("Screen size: "
              , uint_to_str(getDisplaySizeX(), sizeXBuf, 10)
              , "x"
              , uint_to_str(getDisplaySizeY(), sizeYBuf, 10)
              , "\n"
              , 0);
     }
+#endif
 
     asm inline(
         "movl $1783793664, %ecx\n"
         "L7: loop L7\n"
     );
 
+#ifndef NDEBUG
     if (mb_info->flags & (1 << 6))
     {
         // print the memory map information
         char buf[9], buf2[11];
         memset(buf, 0, 9); memset(buf2, 0, 11);
 
-        putsN("\e\x07[\e\x01 INFO \e\x07] Memory map: address=0x"
+        info("Memory map: address=0x"
              , uint_to_str(mb_info->mmap_addr, buf, 16)
              , "\tlength="
              , int_to_str(mb_info->mmap_length, buf2, 10)
@@ -77,7 +82,7 @@
         {
             memset(addr_buf, 0, 18); memset(len_buf, 0, 23); memset(size_buf, 0, 23);
 
-            putsN("\e\x07[\e\x01 INFO \e\x07] \t* addr=0x"
+            info("\t* addr=0x"
                  , uint_to_str(mmap_entry->addr, addr_buf, 16)
                  , "\t len="
                  , uint_to_str(mmap_entry->len, len_buf, 10)
@@ -103,6 +108,7 @@
             putsN("\tsize=", int_to_str(mmap_entry->size, size_buf, 10), "\n", 0);
         }
     }
+#endif
 
     asm inline(
         "movl $1783793664, %ecx\n"
@@ -110,13 +116,22 @@
     );
 
     puts("\e\x07         Paging available memory...\n");
-    putsN("\e\x07[\e\x04", "FAILED\e\x07] Paging not yet implemented.\n", 0);
+
+    if (mb_info->flags & (1 << 6))
+    {
+        if (!enable_paging(mb_info->mmap_addr, mb_info->mmap_length))
+            ok("Enabled paging.\n");
+        else
+            terminate("Failed paging the available memory. Halting system...", 0x1763);
+    }
+    else
+        terminate("Could not page available memory. (unavailable memory map)", 0x1111);
 
     puts("\e\x07         Activating memory allocator...\n");
 
     // activate the memory allocator here
 
-    putsN("\e\x07[\e\x04", "FAILED\e\x07] Memory allocator not yet implemented.\n", 0);
+    terminate("Memory allocator not yet implemented.", 0x5505);
 
     //puts("\e\x07[\e\x0A  OK  \e\x07] Nothing to activate right now... (will come soon)\n");
 
@@ -141,7 +156,7 @@
         "L6: loop L6\n"
     );
 
-    //terminate("This kernel is not fully implemented yet!", 0x0);
+    terminate("This kernel is not fully implemented yet!", 0x1234);
 
     asm inline(
         "wait: jmp wait\n"
