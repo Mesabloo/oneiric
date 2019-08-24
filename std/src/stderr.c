@@ -49,24 +49,26 @@ static void halt()
 {
     uint32_t address = (uint32_t)__builtin_return_address(0);
     char buf[9];
-    size_t const height = 25, width = 80;
+    size_t const height = getDisplaySizeY(), width = getDisplaySizeX();
     memset(buf, 0, 9);
-    
-    moveCursorAt(0, 0);
+    puts("\e\x40");
+
+        moveCursorAt(0, 0);
     for (size_t i = 0; i < height * width; ++i)
-        puts("\e\x40 ");
+        puts(" ");
 
-    moveCursorAt(40 - 4, 8);
-    puts("\e\x74 Oneiric ");
+    char const* title = " Oneiric ";
+    unsigned short beginning_title = width / 2 - (strlen(title) / 2 + 1);
 
-    moveCursorAt(4, 15);
-    putsN("\e\x47", "* What happened: the kernel had to stop its execution because a fatal error occurred!", 0);
-    moveCursorAt(4, getCursorLine() + 1);
-    putsN("\e\x47", "* Reason: ", message, 0);
-    moveCursorAt(4, getCursorLine() + 1);
-    putsN("\e\x47", "* At: 0x", uint_to_str(address, buf, 16), 0);
-    moveCursorAt(4, getCursorLine() + 2);
-    putsN("\e\x47", "* Error code: 0x", int_to_str(error_code, buf, 16), 0);
+    moveCursorAt(beginning_title, 8);
+    putsN("\e\x74", title, 0);
+
+    puts("\e\x47");
+    moveCursorAt(0, height - 10);
+    puts("    * What happened: the kernel had to stop its execution because a fatal error occurred!\n");
+    putsN("    * Reason: ", message, "\n", 0);
+    putsN("    * At: 0x", uint_to_str(address, buf, 16), "\n\n", 0);
+    putsN("    * Error code: 0x", int_to_str(error_code, buf, 16), 0);
 
     halt();
 }
