@@ -2,7 +2,7 @@
 
 CC = 'i386-elf-gcc'
 CC_FLAGS = ['-Wall', '-Wextra', '-m32', '-fno-builtin', '-ffreestanding', '-nostdlib'
-           , '-fno-leading-underscore', '-g', '-c', '-fno-stack-protector'
+           , '-fno-leading-underscore', '-g3', '-c', '-fno-stack-protector'
            , '-lgcc']
 
 AS = CC # 'i386-elf-as'
