@@ -35,7 +35,7 @@ extern void terminate(char const *message, uint16_t const error_code);
 /**
  * Asserts an expression is true, else aborts the program
  */
-#ifdef DNDEBUG
+#ifdef NDEBUG
 #   define assert(e) ;
 #else
     void assert(int e);

@@ -73,7 +73,7 @@ static void halt()
     halt();
 }
 
-#ifndef DNDEBUG
+#ifndef NDEBUG
     void assert(int e)
     {
         if (!e)
