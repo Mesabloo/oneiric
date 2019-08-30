@@ -56,7 +56,7 @@ _start: start:
 
 .init_paging: /* Now we initiate paging */
     movl $(bootPT0 - KERNEL_VIRTUAL_BASE), %edi
-    movl $1024, %ecx
+    movl $2048, %ecx /* because we want to cover both `bootPT0` and `bootPT1`, which are contiguous in memory */
     movl $0, %esi /* We create the first page table (we'll only need one at this stage) */
 .L1:
     movl %esi, %edx
@@ -65,20 +65,28 @@ _start: start:
 .L2:
     addl $4096, %esi
     addl $4, %edi
-    loop .L1 /* We map the first 4 MiB of memory to `0xC0000000` */
+    loop .L1 /* We map the first 8 MiB of memory to `0xC0000000` */
 .L3:
     movl $(bootPD - KERNEL_VIRTUAL_BASE), %esi
     movl $(bootPT0 - KERNEL_VIRTUAL_BASE), (%esi)
-    orl $0x003, (%esi) 
+    orl $0x003, (%esi) /* We temporarily register the first page table at the beginning of the page directory */
+    addl $4, %esi
+    movl $(bootPT1 - KERNEL_VIRTUAL_BASE), (%esi)
+    orl $0x003, (%esi) /* We temporarily register the second page table at the beginning of the page directory */
+    /* Those temporary registrations are here so that we can still continue to execute
+       some code until we jump to the correct virual address, which is done a bit later,
+       after the initialization of the GDT, when we initialize the code segment */
 
-    addl $3072, %esi
+    addl $3068, %esi
     movl $(bootPT0 - KERNEL_VIRTUAL_BASE), (%esi)
-    orl $0x003, (%esi)
-
-    movl $(bootPD - KERNEL_VIRTUAL_BASE), %esi
-    addl $4092, %esi
-    movl $(bootPD - KERNEL_VIRTUAL_BASE), (%esi)
     orl $0x003, (%esi) /* We register the first page table in the page directory */
+    addl $4, %esi
+    movl $(bootPT1 - KERNEL_VIRTUAL_BASE), (%esi)
+    orl $0x003, (%esi) /* We register the second page table in the page directory */
+
+    movl $(bootPD - KERNEL_VIRTUAL_BASE + 4088), %esi
+    movl $(bootPD - KERNEL_VIRTUAL_BASE), (%esi)
+    orl $0x003, (%esi) 
 
     movl $(bootPD - KERNEL_VIRTUAL_BASE), %edx
     movl %edx, %cr3
@@ -154,6 +162,7 @@ launch:
     .align 4096
     bootPD: .space 4096  /* 4 KiB of space, for 1024 entries */
     bootPT0: .space 4096 /* 4 KiB of space, for 1024 entries */
+    bootPT1: .space 4096 /* 4 KiB of space, for 1024 entries */
 
     callstack_bottom:
     .space 1024*256 /* 256 kiB for the callstack, should be largely enough */

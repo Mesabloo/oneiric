@@ -7,9 +7,12 @@
 #include <std/stdmem.h>
 #include <core/memory/pager.h>
 #include <utils/logs.h>
+#include <std/io/cursor.h>
 
 /* extern */ void kMain(multiboot_info_t* mb_info)
 {
+    disable_cursor();
+
     assert(mb_info);
     if (mb_info->flags & (1 << 12) && mb_info->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT)
         initDisplay(mb_info->framebuffer_width, mb_info->framebuffer_height);
@@ -56,76 +59,27 @@
     }
 #endif
 
-    asm inline(
-        "movl $1783793664, %ecx\n"
-        "L7: loop L7\n"
-    );
-
-#ifndef NDEBUG
-    if (mb_info->flags & (1 << 6))
-    {
-        // print the memory map information
-        char buf[9], buf2[11];
-        memset(buf, 0, 9); memset(buf2, 0, 11);
-
-        info("Memory map: address=0x"
-             , uint_to_str(mb_info->mmap_addr, buf, 16)
-             , "\tlength="
-             , int_to_str(mb_info->mmap_length, buf2, 10)
-             , ":\n"
-             , 0);
-
-        char addr_buf[18], len_buf[23], size_buf[23];
-        multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t*) mb_info->mmap_addr;
-        for(; (uint32_t) mmap_entry + sizeof(multiboot_memory_map_t) <= (uint32_t) mb_info->mmap_addr + mb_info->mmap_length
-            ; mmap_entry = (multiboot_memory_map_t*) ((uint32_t) mmap_entry + mmap_entry->size + sizeof(mmap_entry->size)))
-        {
-            memset(addr_buf, 0, 18); memset(len_buf, 0, 23); memset(size_buf, 0, 23);
-
-            info("\t* addr=0x"
-                 , uint_to_str(mmap_entry->addr, addr_buf, 16)
-                 , "\t len="
-                 , uint_to_str(mmap_entry->len, len_buf, 10)
-                 , " B\t type="
-                 , 0);
-
-            switch (mmap_entry->type)
-            {
-                case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
-                    puts("ACPI"); break;
-                case MULTIBOOT_MEMORY_AVAILABLE:
-                    puts("AVAILABLE"); break;
-                case MULTIBOOT_MEMORY_BADRAM:
-                    puts("BAD"); break;
-                case MULTIBOOT_MEMORY_NVS:
-                    puts("NVS"); break;
-                case MULTIBOOT_MEMORY_RESERVED:
-                    puts("RESERVED"); break;
-                default:
-                    puts("UNKNOWN"); break;
-            }
-
-            putsN("\tsize=", int_to_str(mmap_entry->size, size_buf, 10), "\n", 0);
-        }
-    }
-#endif
-
-    asm inline(
-        "movl $1783793664, %ecx\n"
-        "L5: loop L5\n"
-    );
+    // asm inline(
+    //     "movl $1783793664, %ecx\n"
+    //     "L5: loop L5\n"
+    // );
 
     puts("\e\x07         Paging available memory...\n");
 
     if (mb_info->flags & (1 << 6))
     {
         if (!enable_paging(mb_info->mmap_addr, mb_info->mmap_length))
-            ok("Enabled paging.\n");
+            ok("Paged available memory.\n", 0);
         else
             terminate("Failed paging the available memory. Halting system...", 0x1763);
     }
     else
         terminate("Could not page available memory. (unavailable memory map)", 0x1111);
+
+    asm inline(
+        "movl $1783793664, %ecx\n"
+        "L5: loop L5\n"
+    );
 
     puts("\e\x07         Activating memory allocator...\n");
 
