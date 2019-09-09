@@ -12,7 +12,7 @@ static uint32_t __attribute__((aligned(4096))) pageTables[1024 * 1024];
 
 int enable_paging(uint32_t mmap_addr, uint32_t mmap_length)
 {
-#ifndef NDEBUG
+#ifdef ENABLE_LOGGING
     {
         char buf[9], buf2[11];
         memset(buf, 0, 9); memset(buf2, 0, 11);
@@ -59,10 +59,10 @@ int enable_paging(uint32_t mmap_addr, uint32_t mmap_length)
     }
 #endif
 
-    asm inline(
-        "movl $1783793664, %ecx\n"
-        "L5: loop L5\n"
-    );
+    // asm inline(
+    //     "movl $1783793664, %ecx\n"
+    //     "L5: loop L5\n"
+    // );
 
     // just initialize all the page entries to the default flags
 
@@ -73,8 +73,38 @@ int enable_paging(uint32_t mmap_addr, uint32_t mmap_length)
 
     // first let's map our conventional memory
     // ! We need to get it from the `mmap_addr` provided in the function parameters
-    // ! And we also need to make sure that we don't map the physical memory < 0x800000
+    // ! And we also need to make sure that we don't remap the physical memory < 0x800000
 
+    uint32_t paging_memory = 0x0;
+    multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t*) mmap_addr;
+    for(; (uint32_t) mmap_entry + sizeof(multiboot_memory_map_t) <= (uint32_t) mmap_addr + mmap_length
+        ; mmap_entry = (multiboot_memory_map_t*) ((uint32_t) mmap_entry + mmap_entry->size + sizeof(mmap_entry->size)))
+    {
+        if (mmap_entry->type != MULTIBOOT_MEMORY_AVAILABLE)
+            continue;
+
+        uint32_t beginning = mmap_entry->addr;
+        uint32_t const ending = beginning + mmap_entry->len;
+
+        for (; beginning < ending; beginning += 4096)
+        {
+            if (beginning < 0x800000)
+                continue;
+            
+#ifdef ENABLE_LOGGING
+            char buf[9], buf2[9];
+            memset(buf, 0, 9);
+            memset(buf2, 0, 9);
+            uint_to_str(paging_memory, buf, 16);
+            uint_to_str(beginning, buf2, 16);
+
+            info("Mapped 0x", buf2, " to 0x", buf, "\n", 0);
+#endif
+
+            pageTables[paging_memory / 4096] = (beginning << 12) | 0b11;
+            paging_memory += 4096;
+        }
+    }
 
     // then let's remap the kernel (0x0 -> 0x800000 ==> 0xc0000000 -> 0xc0800000) 
     // ! The kernel must be mapped at the index 768 in the page directory

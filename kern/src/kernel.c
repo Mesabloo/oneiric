@@ -44,7 +44,7 @@
 
     clear();
 
-#ifndef NDEBUG
+#ifdef ENABLE_LOGGING
     {
         moveCursorAt(0, 0);
         char sizeXBuf[23], sizeYBuf[23];
