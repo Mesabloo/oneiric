@@ -23,7 +23,7 @@ if not args.action:
     exit(1)
 
 for act in args.action:
-    if len(list(filter(lambda name: name == act, config_functions))) < 1 or not hasattr(config, act):
+    if len([name for name in config_functions if name == act]) < 1 or not hasattr(config, act):
         log.error('Unknown action “{}” in “{}”.\nPerhaps you forgot to put it into the config file?'.format(act, args.config if args.config else 'omake_conf.py'), 0)
         print('')
         continue

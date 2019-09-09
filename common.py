@@ -3,13 +3,13 @@
 CC = 'i386-elf-gcc'
 CC_FLAGS = ['-Wall', '-Wextra', '-m32', '-fno-builtin', '-ffreestanding', '-nostdlib'
            , '-fno-leading-underscore', '-g3', '-c', '-fno-stack-protector'
-           , '-lgcc']
+           , '-lgcc', '-DENABLE_LOGGING']
 
 AS = CC # 'i386-elf-as'
 AS_FLAGS = CC_FLAGS # ['--32']
 
 LD = CC
-LD_FLAGS = list(filter(lambda p: p != '-c', CC_FLAGS))
+LD_FLAGS = [p for p in CC_FLAGS if p != '-c']
 
 binaries = ['*.o', '*.bin']
 

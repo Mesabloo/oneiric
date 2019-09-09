@@ -26,7 +26,7 @@ def run(props):
                 for file in glob.glob(join(path, pattern), recursive=False):
                     log.info('Compiling file “{}”...'.format(file), logLevel)
                     path2, filename = split(file)
-                    command = [CC] + [file] + ['-o', join(path2, filename.replace(pattern.replace('*', ''), '.o'))] + CC_FLAGS + ['-Ikern/include', '-Istd/include']
+                    command = [CC, file, '-o', join(path2, filename.replace(pattern.replace('*', ''), '.o'))] + CC_FLAGS + ['-Ikern/include', '-Istd/include']
                     if props['debug']:
                         log.debug('Command used: {}'.format(' '.join(command)), logLevel)
                     cmd = subprocess.Popen(command, stdout=subprocess.PIPE)
