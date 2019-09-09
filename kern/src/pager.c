@@ -83,26 +83,17 @@ int enable_paging(uint32_t mmap_addr, uint32_t mmap_length)
         if (mmap_entry->type != MULTIBOOT_MEMORY_AVAILABLE)
             continue;
 
-        uint32_t beginning = mmap_entry->addr;
-        uint32_t const ending = beginning + mmap_entry->len;
+        uint64_t beginning = mmap_entry->addr;
+        uint64_t const ending = beginning + mmap_entry->len;
 
         for (; beginning < ending; beginning += 4096)
         {
+            if (beginning >= 0x100000000)
+                break;
             if (beginning < 0x800000)
                 continue;
-            
-#ifdef ENABLE_LOGGING
-            char buf[9], buf2[9];
-            memset(buf, 0, 9);
-            memset(buf2, 0, 9);
-            uint_to_str(paging_memory, buf, 16);
-            uint_to_str(beginning, buf2, 16);
 
-            info("Mapped 0x", buf2, " to 0x", buf, "\n", 0);
-#endif
-
-            pageTables[paging_memory / 4096] = (beginning << 12) | 0b11;
-            paging_memory += 4096;
+            pageTables[paging_memory++] = (beginning << 12) | 0b11;
         }
     }
 
