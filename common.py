@@ -3,7 +3,7 @@
 CC = 'i386-elf-gcc'
 CC_FLAGS = ['-Wall', '-Wextra', '-m32', '-fno-builtin', '-ffreestanding', '-nostdlib'
            , '-fno-leading-underscore', '-g3', '-c', '-fno-stack-protector'
-           , '-lgcc', '-DENABLE_LOGGING']
+           , '-lgcc'] #, '-DENABLE_LOGGING']
 
 AS = CC # 'i386-elf-as'
 AS_FLAGS = CC_FLAGS # ['--32']
