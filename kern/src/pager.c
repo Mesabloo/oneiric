@@ -92,6 +92,11 @@ int enable_paging(uint32_t mmap_addr, uint32_t mmap_length)
                 break;
             if (beginning < 0x800000)
                 continue;
+            if (paging_memory >= 0xC0000 && paging_memory <= 0xC0800)
+            {
+                paging_memory++;
+                continue;
+            }
 
             pageTables[paging_memory++] = (beginning << 12) | 0b11;
         }
