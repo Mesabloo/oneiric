@@ -105,7 +105,8 @@ init:
     call initDisplayBuffer
     sub $0x4, %esp
 
-    lgdt glob_desc_table /* We load our Global Descriptor Table */
+    lgdt global_desc_table       /* We load our Global Descriptor Table */
+    lidt interrupt_desc_table  /* We load our Interrupt Descriptor Table */
 
     ljmp $0x08, $init2 /* We initialize %cs */
 init2:
@@ -117,6 +118,8 @@ init2:
     movw %ax, %gs /* And all the other segments needed for the GDT */
 
     invlpg 0 /* Invalidate the address 0 */
+
+    sti
 
 launch:
     pushl $multiboot_info
@@ -131,27 +134,57 @@ launch:
 /* end section .text */
 
 .section .data
+    .global global_desc_table
+    .global interrupt_desc_table
+
     gdt_ptr:
-    gdt_ptr_null:
-        .quad 0
-    gdt_ptr_code:
-        .word 0xffff     /* segment size limit */
-        .word 0          /* first base (bit #0 -> #15) */
-        .byte 0          /* second base (bit #16 -> #23) */
-        .byte 0x9a       /* access byte */
-        .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
-        .byte 0          /* third base (bit #24 -> #31) */
-    gdt_ptr_data:
-        .word 0xffff     /* segment size limit */
-        .word 0          /* first base (bit #0 -> #15) */
-        .byte 0          /* second base (bit #16 -> #23) */
-        .byte 0x92       /* access byte */
-        .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
-        .byte 0          /* third base (bit #24 -> #31) */
+        gdt_ptr_null:
+            .quad 0
+        gdt_ptr_code:
+            .word 0xffff     /* segment size limit */
+            .word 0          /* first base (bit #0 -> #15) */
+            .byte 0          /* second base (bit #16 -> #23) */
+            .byte 0x9a       /* access byte */
+            .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
+            .byte 0          /* third base (bit #24 -> #31) */
+        gdt_ptr_data:
+            .word 0xffff     /* segment size limit */
+            .word 0          /* first base (bit #0 -> #15) */
+            .byte 0          /* second base (bit #16 -> #23) */
+            .byte 0x92       /* access byte */
+            .byte 0b11001111 /* high 4 bits (flags) ; low 4 bits (limit 4 last bits)(limit is 20 bit wide) */
+            .byte 0          /* third base (bit #24 -> #31) */
+        gdt_ptr_user_code:
+            .word 0xffff
+            .word 0
+            .word 0
+            .word 0xfa
+            .byte 0b11001111
+            .byte 0
+        gdt_ptr_user_data:
+            .word 0xffff
+            .word 0
+            .word 0
+            .word 0xf2
+            .byte 0b11001111
+            .byte 0
     gdt_end:
-    glob_desc_table:
+
+    idt_ptr:
+        .word 0          /* offset bits 0..15 */
+        .word 0          /* a code segment selector in GDT or LDT */
+        .byte 0          /* unused, set to 0 */
+        .byte 0b00001110 /* type and attributes */
+        .word 0          /* offset bits 16..31 */
+    idt_end:
+
+    global_desc_table:
         glob_desc_table_size:    .word gdt_end - gdt_ptr - 1
         glob_desc_table_ptr:     .long gdt_ptr
+
+    interrupt_desc_table:
+        idt_ptr_len: .word 0x100    /* IDT length (in bytes - 1) */
+        idt_ptr_addr: .long idt_ptr /* IDT first entry address */
 /* end section .data */
 
 .section .rodata
